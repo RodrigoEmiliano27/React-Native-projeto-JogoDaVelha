@@ -14,19 +14,24 @@ export default function App() {
 
   {/*  icones podem ser encontrados aqui: https://icons.expo.fyi/Index */}
   
-  const [valor1 ,setvalor1] = useState(" ");
-  const [valor2 ,setvalor2] = useState(" ");
-  const [resultado ,setResultado] = useState(" ");
-  const [labelJogador ,setlabelJogador] = useState("É a vez do jogador 1!");
-  const [showImage, setShowImage] = useState(false); // Estado para controlar a exibição da imagem
+
   const [mapaJogadas,setMapaJogadas] = useState([['','',''],['','',''],['','','']])
   const [jogadorAtual,setJogadorAtual] = useState("X")
+  const [ganhador,setGanhador] = useState("")
 
   useEffect(() => {
      console.log('useeffect processado!');
      verificaGanhador();
-   }, [mapaJogadas])
+   }, [mapaJogadas,ganhador])
   
+   function LimpaCampos()
+   {
+     let mapaAtual = [['','',''],['','',''],['','','']]
+     setMapaJogadas(mapaAtual)
+     setJogadorAtual("X")
+
+   }
+
    function verificaGanhador() {
     console.log("Verificando jogador...")
     let ganhador="";
@@ -36,8 +41,19 @@ export default function App() {
     {
       ganhador=verificaColuna()
     }
+    
+    if(ganhador==="")
+    {
+      ganhador=verificaDiagonais()
+    }
 
     console.log("ganhador: "+ganhador)
+
+    if(ganhador==="X"|| ganhador==="O")
+    {
+      setGanhador(ganhador)
+      Alert.alert("O jogador '"+ganhador+"'"+" ganhou!")
+    }
 
       
   }
@@ -73,6 +89,24 @@ export default function App() {
           break;
         }
       }
+      return ganhou
+  }
+  function verificaDiagonais()
+  {
+    console.log("Verificando colunas...")
+    let ganhou=""
+      if(mapaJogadas[0][0]+mapaJogadas[1][1]+mapaJogadas[2][2]==="XXX" || 
+        mapaJogadas[0][0]+mapaJogadas[1][1]+mapaJogadas[2][2]==="OOO")
+        {
+          console.log("entrouuu mapaJogadas[0][0] "+mapaJogadas[0][0])
+          ganhou=mapaJogadas[0][0];
+        }
+        else if(mapaJogadas[0][2]+mapaJogadas[1][1]+mapaJogadas[2][0]==="XXX" || 
+        mapaJogadas[0][2]+mapaJogadas[1][1]+mapaJogadas[2][0]==="OOO")
+        {
+          console.log("entrouuu mapaJogadas[0][2] "+mapaJogadas[0][2])
+          ganhou=mapaJogadas[0][2];
+        }
       return ganhou
   }
   function VerificaCampos()
@@ -206,7 +240,7 @@ export default function App() {
   return (
     <View style={styles.container}>
 
-      <Text style={styles.legenda}  >{labelJogador}</Text>
+      <Text style={styles.legenda}  >{"É a vez do jogador '"+jogadorAtual+"'"}</Text>
 
       <View style={styles.linhaBotao} >
         
@@ -254,9 +288,12 @@ export default function App() {
           {mapaJogadas[2][2]==="O"? <Entypo name="circle" size={35} color="white" />: null}
         </TouchableOpacity>
       </View>
-   
-      <Text style = {styles.resultado}>Resultado: {resultado} </Text>
 
+      {ganhador==="X" || ganhador==="O"? 
+      <TouchableOpacity style={styles.botaoJogaNovamente} onPress={()=>{LimpaCampos()}  }>
+        <Text style={styles.legendaBtnJogarNovamente}>Jogar Novamente!</Text>
+      </TouchableOpacity>: null}
+   
       <StatusBar style="auto" />
     </View>
   );
@@ -277,10 +314,17 @@ const styles = StyleSheet.create({
     height:'auto'
   },
   legenda: {
-    fontSize: 20,
+    fontSize:35,
     color: 'white',
     fontWeight: '500',
-    marginBottom:10
+    marginBottom:50
+  },
+  legendaBtnJogarNovamente: {
+    fontSize:20,
+    color: 'black',
+    justifyContent: 'center',
+    textAlign: 'center',
+    fontWeight: '500',
   },
   caixaTexto: {
     fontSize:20,
@@ -303,10 +347,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     borderRadius: 20,
     alignItems: 'center',
-    flexDirection: 'row',
+    flexDirection: 'column',
     paddingVertical:5,
     marginBottom:5,
     marginTop: 5, 
+    borderColor: 'white',
+    borderWidth: 1,
+    borderRadius: 10,
+  },
+  botaoJogaNovamente: {
+    justifyContent: 'center',
+    width: '70%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingVertical:5,
+    marginBottom:5,
+    marginTop: 20, 
     borderColor: 'white',
     borderWidth: 1,
     borderRadius: 10,
