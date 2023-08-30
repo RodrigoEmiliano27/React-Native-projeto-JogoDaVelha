@@ -1,11 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, 
+import { Text, View, TextInput, 
   TouchableOpacity, Keyboard,Alert, Image } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import { Feather } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
+import styles from "./styles";
 
 
 export default function App() {
@@ -18,6 +18,7 @@ export default function App() {
   const [mapaJogadas,setMapaJogadas] = useState([['','',''],['','',''],['','','']])
   const [jogadorAtual,setJogadorAtual] = useState("X")
   const [ganhador,setGanhador] = useState("")
+  const [velha,setVelha] = useState("")
 
   useEffect(() => {
      console.log('useeffect processado!');
@@ -29,7 +30,120 @@ export default function App() {
      let mapaAtual = [['','',''],['','',''],['','','']]
      setMapaJogadas(mapaAtual)
      setJogadorAtual("X")
+     setGanhador("")
+     setVelha(false)
 
+   }
+   function ProcuraVelhaLinhaHorizontal(indice)
+   {
+      let jogadasLinhas = mapaJogadas[indice][0]+mapaJogadas[indice][1]+mapaJogadas[indice][2]
+
+      if(jogadasLinhas==="")
+      {
+        return false;
+      }
+        
+      if(jogadasLinhas.includes("OX")|| jogadasLinhas.includes("XO"))
+      {
+        return true;
+      }
+
+      return false;
+
+   }
+   function ProcuraVelhaLinhaVertical(indice)
+   {
+      let jogadasLinhas = mapaJogadas[0][indice]+mapaJogadas[1][indice]+mapaJogadas[2][indice]
+
+      if(jogadasLinhas==="")
+      {
+        return false;
+      }
+        
+      if(jogadasLinhas.includes("OX")|| jogadasLinhas.includes("XO"))
+      {
+        return true;
+      }
+      return false;
+
+   }
+   function ProcuraVelhaDiagonal(indice)
+   {
+      
+      let jogadasLinhas = ""
+      
+      if(indice===0)
+      {
+        jogadasLinhas = mapaJogadas[0][0]+mapaJogadas[1][1]+mapaJogadas[2][2]
+      }
+      else
+      {
+        jogadasLinhas = mapaJogadas[0][2]+mapaJogadas[1][1]+mapaJogadas[2][0]
+      }
+
+      console.log("ProcuraVelhaDiagonal "+ indice + " "+ jogadasLinhas )
+      
+
+      if(jogadasLinhas==="")
+      {
+        console.log("ProcuraVelhaDiagonal "+ indice + " retorna falso 1" )
+        return false;
+      }
+        
+      if(jogadasLinhas.includes("XO")|| jogadasLinhas.includes("OX"))
+      {
+        console.log("ProcuraVelhaDiagonal "+ indice + " retorna true" )
+        return true;
+      }
+
+      console.log("ProcuraVelhaDiagonal "+ indice + " retorna falso 2" )
+      return false;
+
+   }
+   function VerificaVelha()
+   {
+      let deuVelha=true;
+      if(ProcuraVelhaDiagonal(0)===false)
+      {
+        return;
+      }
+      else if(ProcuraVelhaDiagonal(1)===false)
+      {
+        return
+      }
+      
+
+      for (let i = 0; i < 3; i++) 
+      {
+        if(ProcuraVelhaLinhaHorizontal(i)===false)
+        {
+          console.log("ProcuraVelhaLinhaHorizontal " +  i  + "ainda tem")
+          deuVelha=false
+          break;
+        }
+        else
+        {
+          console.log("ProcuraVelhaLinhaHorizontal " +  i  + "velha")
+        }
+
+        if(ProcuraVelhaLinhaVertical(i)===false)
+        {
+          console.log("ProcuraVelhaLinhaVertical " +  i  + "ainda tem")
+          deuVelha=false
+          break;
+        }
+        else
+        {
+          console.log("ProcuraVelhaLinhaVertical " +  i  + "velha")
+        }
+        
+      }
+      
+      if(deuVelha===true)
+      {
+        setVelha(true)
+        Alert.alert("Deu velha!")
+      }
    }
 
    function verificaGanhador() {
@@ -53,6 +167,11 @@ export default function App() {
     {
       setGanhador(ganhador)
       Alert.alert("O jogador '"+ganhador+"'"+" ganhou!")
+    }
+
+    if(ganhador==="")
+    {
+      VerificaVelha();
     }
 
       
@@ -184,28 +303,10 @@ export default function App() {
 
   
 
-  function limparCampos()
-  {
-    setResultado(0);
-    setvalor1(" ");
-    setvalor2(" ");
-   
-  }
+  
 
   
-  function pressionaBotao(fncBotao, textoBotao) {
 
-    if (textoBotao.length == 0 && resultadoJogo.length == 0) {
-      fncBotao(jogada);
-
-      if (jogada == "X")
-        setJogada("O");
-      else
-        setJogada("X");
-
-       //verificaGanhador();
-    }
-  }
 
   btnPressionado = (type) => {
     if(type === 1){
@@ -240,11 +341,13 @@ export default function App() {
   return (
     <View style={styles.container}>
 
+
+      <Text style={styles.legenda}  >{"Jogo da velha"}</Text>
       <Text style={styles.legenda}  >{"É a vez do jogador '"+jogadorAtual+"'"}</Text>
 
       <View style={styles.linhaBotao} >
         
-        <TouchableOpacity style={styles.botao} onPress={()=>{btnPressionado(1)}  }>
+        <TouchableOpacity style={[styles.sombra,styles.botao]} onPress={()=>{btnPressionado(1)}  }>
           {mapaJogadas[0][0]==="X"? <Feather name="x" size={50} color="white" />: null}
           {mapaJogadas[0][0]==="O"? <Entypo name="circle" size={35} color="white" />: null}
         </TouchableOpacity>
@@ -274,8 +377,8 @@ export default function App() {
       </View>
 
       <View style={styles.linhaBotao} >
-        
-        <TouchableOpacity style={styles.botao} onPress={()=>{btnPressionado(7)}  }>
+      
+        <TouchableOpacity style={[styles.botao,styles.sombra]} onPress={()=>{btnPressionado(7)}  }>
           {mapaJogadas[2][0]==="X"? <Feather name="x" size={50} color="white" />: null}
           {mapaJogadas[2][0]==="O"? <Entypo name="circle" size={35} color="white" />: null}
         </TouchableOpacity>
@@ -289,7 +392,7 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-      {ganhador==="X" || ganhador==="O"? 
+      {ganhador==="X" || ganhador==="O" || velha? 
       <TouchableOpacity style={styles.botaoJogaNovamente} onPress={()=>{LimpaCampos()}  }>
         <Text style={styles.legendaBtnJogarNovamente}>Jogar Novamente!</Text>
       </TouchableOpacity>: null}
@@ -299,91 +402,4 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1d0f6e',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  linhaBotao: {
-    flexDirection:"row",
-    height:'20%',
-    width: "100%",
-    justifyContent:"space-around",
-    height:'auto'
-  },
-  legenda: {
-    fontSize:35,
-    color: 'white',
-    fontWeight: '500',
-    marginBottom:50
-  },
-  legendaBtnJogarNovamente: {
-    fontSize:20,
-    color: 'black',
-    justifyContent: 'center',
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  caixaTexto: {
-    fontSize:20,
-    color: 'white',
-    fontWeight: '500',
-    fontStyle: 'italic',
-    color: 'white',
-    width: '70%',
-    height: 40,
-    borderColor: 'white',
-    borderWidth: 1,
-    borderRadius: 10,
-    marginBottom: 20,
-    paddingHorizontal: 20,
-  },
-  botao: {
-    justifyContent: 'center',
-    width: '30%',
-    height: 90,
-    backgroundColor: 'black',
-    borderRadius: 20,
-    alignItems: 'center',
-    flexDirection: 'column',
-    paddingVertical:5,
-    marginBottom:5,
-    marginTop: 5, 
-    borderColor: 'white',
-    borderWidth: 1,
-    borderRadius: 10,
-  },
-  botaoJogaNovamente: {
-    justifyContent: 'center',
-    width: '70%',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingVertical:5,
-    marginBottom:5,
-    marginTop: 20, 
-    borderColor: 'white',
-    borderWidth: 1,
-    borderRadius: 10,
-  },
-  resultado:{
-    fontSize:25,
-    color: 'white',
-    fontWeight: '500',
-    fontStyle: 'italic',
-    marginTop:10
-  },
-  imagem:{
-    height: 200,
-    width: 200
-  },
-  iconeBotao:{
-    color:'white',
-    marginLeft:'25%',
-    marginRight:20,
-  }
 
-});
